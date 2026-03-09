@@ -1,16 +1,26 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.db.models import Student
 from app.schemas.student import StudentCreate, StudentUpdate
 
 
 def get_students(db: Session, skip: int = 0, limit: int = 100) -> list[Student]:
     return (
-        db.query(Student).order_by(Student.student_id).offset(skip).limit(limit).all()
+        db.query(Student)
+        .options(joinedload(Student.class_rel))
+        .order_by(Student.student_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
 
 
 def get_student(db: Session, student_id: str) -> Student | None:
-    return db.query(Student).filter(Student.student_id == student_id).first()
+    return (
+        db.query(Student)
+        .options(joinedload(Student.class_rel))
+        .filter(Student.student_id == student_id)
+        .first()
+    )
 
 
 def create_student(db: Session, student: StudentCreate) -> Student:
@@ -18,6 +28,8 @@ def create_student(db: Session, student: StudentCreate) -> Student:
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
+    # Eagerly load the relationship
+    db.refresh(db_student, attribute_names=["class_rel"])
     return db_student
 
 

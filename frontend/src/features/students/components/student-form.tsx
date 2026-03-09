@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { createStudent, updateStudent } from '@/features/students/api/student-api';
-import { Student } from '@/features/students/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { createStudent, updateStudent, fetchClasses } from '@/features/students/api/student-api';
+import { Student, ClassItem } from '@/features/students/types';
 
 interface StudentFormProps {
     mode: 'create' | 'edit';
@@ -27,6 +28,7 @@ const formSchema = z.object({
     birth_year: z.number().min(1970, 'Must be after 1970').max(2010, 'Must be before 2010'),
     major: z.string().min(1, 'Major is required').max(255),
     gpa: z.number().min(0, 'Min 0.0').max(4.0, 'Max 4.0'),
+    class_id: z.string().min(1, 'Class is required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,12 +36,20 @@ type FormValues = z.infer<typeof formSchema>;
 export function StudentForm({ mode, initialData }: StudentFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [classes, setClasses] = useState<ClassItem[]>([]);
+
+    useEffect(() => {
+        fetchClasses()
+            .then(setClasses)
+            .catch(() => toast.error('Failed to load classes'));
+    }, []);
 
     const {
         register,
         handleSubmit,
         formState: { errors, isValid, isDirty },
         setError,
+        control,
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -48,6 +58,7 @@ export function StudentForm({ mode, initialData }: StudentFormProps) {
             birth_year: initialData?.birth_year ?? ('' as unknown as number),
             major: initialData?.major ?? '',
             gpa: initialData?.gpa ?? ('' as unknown as number),
+            class_id: initialData?.class_id ?? '',
         },
         mode: 'onChange',
     });
@@ -55,7 +66,6 @@ export function StudentForm({ mode, initialData }: StudentFormProps) {
     const onSubmit = async (data: FormValues) => {
         setIsSubmitting(true);
         try {
-            // Ensure GPA is strictly rounded to 2 decimal places
             const formattedData = { ...data, gpa: Number(data.gpa.toFixed(2)) };
 
             if (mode === 'create') {
@@ -109,6 +119,33 @@ export function StudentForm({ mode, initialData }: StudentFormProps) {
                             <Label htmlFor="name">Full Name</Label>
                             <Input id="name" placeholder="Nguyen Van A" {...register('name')} />
                             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="class_id">Class</Label>
+                            <Controller
+                                name="class_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        value={field.value}
+                                    >
+                                        <SelectTrigger id="class_id" className="w-full h-10">
+                                            <SelectValue placeholder="Select a class..." />
+                                        </SelectTrigger>
+                                        <SelectContent alignItemWithTrigger={false}>
+                                            {classes.map((c) => (
+                                                <SelectItem key={c.class_id} value={c.class_id}>
+                                                    {c.class_name} ({c.class_id})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.class_id && <p className="text-xs text-destructive">{errors.class_id.message}</p>}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

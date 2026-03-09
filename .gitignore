@@ -6,8 +6,8 @@ desktop.ini
 # Logs and temp files
 *.log
 npm-debug.log*
-yarn-error.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 *.tmp
@@ -19,7 +19,7 @@ lerna-debug.log*
 *_backup.*
 *_copy.*
 
-# Editor directories
+# Editor and IDE directories
 .vscode/
 .idea/
 *.iml
@@ -29,14 +29,19 @@ lerna-debug.log*
 .env
 .env.*
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
 
-# Python files
+# Backend (Python / FastAPI)
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+dist/
 .eggs/
 *.egg-info/
 *.egg
@@ -46,8 +51,13 @@ venv/
 .venv/
 env/
 ENV/
+htmlcov/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
 
-# JavaScript / Node.js
+# Frontend (Next.js / React)
 node_modules/
 .pnp*
 .yarn/*
@@ -60,10 +70,9 @@ coverage/
 test-results/
 .next/
 out/
-build/
-dist/
 .vercel/
 *.tsbuildinfo
+next-env.d.ts
 
 # Credentials / Secrets
 *.pem
@@ -78,7 +87,7 @@ NOTES.txt
 scratch.*
 test123.*
 
-# Project specific
+# Project Specific (Database, etc.)
 backend/*.db
 backend/*.sqlite3
 backend/alembic.ini

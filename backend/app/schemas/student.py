@@ -15,8 +15,11 @@ class StudentCreate(BaseModel):
         ..., min_length=1, max_length=255, description="Academic program name"
     )
     gpa: float = Field(..., ge=0.0, le=4.0, description="GPA on 4.0 scale")
+    class_id: str = Field(
+        ..., min_length=1, max_length=50, description="Class identifier"
+    )
 
-    @field_validator("student_id", "name", "major")
+    @field_validator("student_id", "name", "major", "class_id")
     @classmethod
     def not_blank(cls, v: str) -> str:
         if not v.strip():
@@ -40,8 +43,11 @@ class StudentUpdate(BaseModel):
         ..., min_length=1, max_length=255, description="Academic program name"
     )
     gpa: float = Field(..., ge=0.0, le=4.0, description="GPA on 4.0 scale")
+    class_id: str = Field(
+        ..., min_length=1, max_length=50, description="Class identifier"
+    )
 
-    @field_validator("name", "major")
+    @field_validator("name", "major", "class_id")
     @classmethod
     def not_blank(cls, v: str) -> str:
         if not v.strip():
@@ -60,5 +66,7 @@ class StudentResponse(BaseModel):
     birth_year: int
     major: str
     gpa: float
+    class_id: str
+    class_name: str = ""
 
     model_config = {"from_attributes": True}

@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.db.database import engine, Base
-from app.api.routers import students
+from app.db.database import engine, Base, SessionLocal
+from app.db.models import Class
+from app.api.routers import students, classes
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +42,27 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(students.router, prefix="/api")
+app.include_router(classes.router, prefix="/api")
+
+
+# Seed sample classes on startup
+@app.on_event("startup")
+def seed_classes():
+    """Auto-seed 3 sample classes if the classes table is empty."""
+    db = SessionLocal()
+    try:
+        count = db.query(Class).count()
+        if count == 0:
+            sample_classes = [
+                Class(class_id="C01", class_name="Computer Science 1", advisor="Nguyen Van A"),
+                Class(class_id="C02", class_name="Software Engineering 1", advisor="Tran Thi B"),
+                Class(class_id="C03", class_name="Information Systems 1", advisor="Le Van C"),
+            ]
+            db.add_all(sample_classes)
+            db.commit()
+            logger.info("Seeded 3 sample classes into the database.")
+    finally:
+        db.close()
 
 
 @app.get("/health", tags=["system"])

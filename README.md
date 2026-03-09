@@ -77,12 +77,22 @@ cd backend
 cp .env.example .env
 ```
 
+| Variable       | Description                       | Default Value               |
+| -------------- | --------------------------------- | --------------------------- |
+| `CORS_ORIGINS` | Allowed origins for CORS          | `["http://localhost:3000"]` |
+| `DATABASE_URL` | SQLite database connection string | `sqlite:///./students.db`   |
+| `SECRET_KEY`   | Secret key for JWT auth/sessions  | `your-secret-key-goes-here` |
+
 **Frontend (`frontend/.env.local`)**
 
 ```bash
 cd frontend
 cp .env.example .env.local
 ```
+
+| Variable              | Description                  | Default Value               |
+| --------------------- | ---------------------------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL` | Base URL for the backend API | `http://localhost:8000/api` |
 
 ## 🏃‍♂️ How to Run (Development Mode)
 
@@ -118,6 +128,12 @@ npm run dev
 ```
 
 > Application available at: `http://localhost:3000`
+
+---
+
+## 🧪 Testing
+
+There is currently no automated test suite implemented for this MVP. Standard testing practices (like `pytest` for the backend and `jest` / `vitest` for the frontend) will be added in future iterations.
 
 ---
 

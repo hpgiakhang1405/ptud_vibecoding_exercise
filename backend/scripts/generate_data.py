@@ -5,7 +5,7 @@ import random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
-from app.db.models import Student, Base
+from app.db.models import Student, Class, Base
 from app.db.database import engine, SessionLocal
 
 # Create tables if they don't exist
@@ -75,9 +75,18 @@ def generate_mock_data(num_students: int = 10):
             f"Database already contains {existing_count} records. Clearing exiting records..."
         )
         db.query(Student).delete()
+        db.query(Class).delete()
         db.commit()
 
     print(f"Generating {num_students} mock student records...")
+
+    class_ids = ["CLS01", "CLS02", "CLS03"]
+    classes = [
+        Class(class_id="CLS01", class_name="Lớp KTPM 01", advisor="Nguyễn Văn A"),
+        Class(class_id="CLS02", class_name="Lớp MMT 02", advisor="Trần Thị B"),
+        Class(class_id="CLS03", class_name="Lớp KHMT 03", advisor="Lê Văn C"),
+    ]
+    db.add_all(classes)
 
     for i in range(1, num_students + 1):
         # Format student ID nicely, e.g., SV001, SV010
@@ -100,6 +109,7 @@ def generate_mock_data(num_students: int = 10):
             birth_year=birth_year,
             major=major,
             gpa=gpa,
+            class_id=random.choice(class_ids),
         )
 
         db.add(new_student)
@@ -109,7 +119,7 @@ def generate_mock_data(num_students: int = 10):
         print("Successfully generated and saved mock data to the database!")
     except Exception as e:
         db.rollback()
-        print(f"Error occurred: {e}")
+        print(f"Error occurred: {repr(e)}")
     finally:
         db.close()
 
